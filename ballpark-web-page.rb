@@ -8,7 +8,6 @@ class BallparkWebPage < WebPage
   def address
     accordion_text = @content.css('ul#accordion')[0].text
     match_data = accordion_text.match(@address_pattern)
-    #pp accordion_text
     
     if( match_data.nil? )
       return ''
