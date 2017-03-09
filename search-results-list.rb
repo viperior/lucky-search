@@ -15,6 +15,7 @@ class SearchResultsList
 
   def get_json_from_uri
     buffer = open(@resource).read
+    return buffer
   end
 
   def parse_results_from_json
@@ -39,10 +40,16 @@ class SearchResultsList
       return get_json_from_uri
     end
   end
+  
+  def save_results(filename)
+    
+  end
 
   def show_results
     @results.each do |result|
       p "Result: title = '#{result.title}', url = '#{result.link}'"
+      p "Team name:"
+      p "#{result.team_name}"
     end
   end
 
