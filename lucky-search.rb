@@ -28,37 +28,39 @@ def main
   lucky_config = LuckyConfig.new
 
   # Specify the filename of the search terms list
-  search_terms_list = QueryTermList.new('search-terms.csv')
-  p "Loading search terms from #{search_terms_list.filename}..."
+  #search_terms_list = QueryTermList.new('search-terms.csv')
+  #p "Loading search terms from #{search_terms_list.filename}..."
 
   # Show results from file
-  p 'Showing results from file...'
-  search_results = SearchResultsList.new('file', 'sample-results.json', 1)
-  search_results.show_results
+  #p 'Showing results from file...'
+  #search_results = SearchResultsList.new('file', 'sample-results.json', 1)
+  #search_results.show_results
 
   # Start fetching results
-  search_terms_list.terms.each do |query|
+  #search_terms_list.terms.each do |query|
     #p "Getting search results for the query: '#{query}'..."
 
     # Set up the Google Custom Search Engine API endpoint
-    cse_endpoint = GoogleCSEEndpoint.new(lucky_config.cse_api_key, lucky_config.cse_search_id, query)
+    #cse_endpoint = GoogleCSEEndpoint.new(lucky_config.cse_api_key, lucky_config.cse_search_id, query)
 
     # Perform the search
     #search_results = SearchResultsList.new('file', 'sample-results.json', 1)
     #search_results.show_results
 
-  end
+  #end
 
   # Show content of a web page
   p 'Showing some specific website content...'
   web_page = BallparkWebPage.new('http://arizona.diamondbacks.mlb.com/ari/ballpark/')
   #web_page = BallparkWebPage.new('http://cleveland.indians.mlb.com/cle/ballpark/')
-  p web_page.title
-  p web_page.address
+  #p web_page.title
+  #p web_page.address
 
   # Test geocoding
-  test_address = Address.new( lucky_config.geocoding_api_key, web_page.address )
-  pp "Lat: #{test_address.latitude}, Long: #{test_address.longitude}"
+  p "api key = #{lucky_config.geocoding_api_key}, textual address = #{web_page.address}"
+  test_address = Address.new( web_page.address, lucky_config.geocoding_api_key )
+  #pp "Lat: #{test_address.latitude}, Long: #{test_address.longitude}"
+  pp test_address
 
 end
 

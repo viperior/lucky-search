@@ -2,55 +2,58 @@ class Address
 
   attr_reader :city, :latitude, :longitude, :route, :state, :street_address, :street_number, :textual_address, :zipcode
 
-  def initialize(textural_address, geocoding_api_key, geocoding_api_options = [])
+  def initialize(textual_address, geocoding_api_key)
     @textual_address = textual_address
     @geocoding_api_key = geocoding_api_key
-    @geocoding_api_options = geocoding_api_options
-    @geocoding_api_data = geodata
-    @geocoding_api_json = geodata_json
-    @geocoding_json_address_components = address_components
+    @json_data = geocoding_api_data_json
 
-    @city = find_address_component 'locality'
-    @state = find_address_component 'administrative_area_level_1'
-    @route = find_address_component 'route'
-    @street_number = find_address_component 'street_number'
-    @zipcode = find_address_component 'postal_code'
+    @city = find_address_component('locality')
+    @state = find_address_component('administrative_area_level_1')
+    @route = find_address_component('route')
+    @street_number = find_address_component('street_number')
+    @zipcode = find_address_component('postal_code')
 
     @street_address = "#{@street_number} #{@route}"
-    @latitude = coordinate 'latitude'
-    @longitude = coordinate 'longitude'
+    @latitude = coordinate('latitude')
+    @longitude = coordinate('longitude')
   end
 
   def address_components
-    return @geocoding_api_data['results']['address_components']
+    return @json_data['results'][0]['address_components']
   end
 
-  def coordinate axis
-    coordinates = @geocoding_api_data['results']['geometry']['location']
+  def coordinate(axis)
+    coordinates = @json_data['results'][0]['geometry']['location']
     return axis == 'latitude' ? coordinates['lat'] : coordinates['lng']
   end
 
-  def long_or_short name
+  def long_or_short(name)
     short_fields = ['administrative_area_level_1', 'route']
-    return short_fields.include? name ? 'short_name' : 'long_name'
+    
+    if( short_fields.include?name )
+      return 'short_name'
+    else
+      return 'long_name'
+    end
   end
 
-  def geodata
-    geocoding_api_uri = GeocodingAPIEndpoint.new( @geocoding_api_key, @textual_address, @geocoding_api_options )
-    return open(geocoding_api_uri.uri).read
+  def geocoding_api_data_json
+    geocoding_api_endpoint = GeocodingAPIEndpoint.new( @textual_address, @geocoding_api_key )
+    geocoding_api_endpoint_uri = geocoding_api_endpoint.uri
+    geocoding_api_data = open( geocoding_api_endpoint_uri ).read
+    geocoding_api_data_json = JSON.parse( geocoding_api_data )
+    return geocoding_api_data_json
   end
 
-  def geodata_json
-    return JSON.parse @geocoding_api_data
+  def find_address_component(name)
+    return address_components[ index_of_address_component(name) ][ long_or_short(name) ]
   end
 
-  def find_address_component name
-    return @geocoding_json_address_components[ index_of_address_component name ][ long_or_short name ]
-  end
-
-  def index_of_address_component name
-    @geocoding_json_address_components.each_with_index do |component, index|
-      return index unless component['types'][0] != name
+  def index_of_address_component(name)
+    address_components.each_with_index do |component, index|
+      if( component['types'][0].to_s == name )
+        return index
+      end
     end
   end
 

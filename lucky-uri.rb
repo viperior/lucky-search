@@ -3,6 +3,7 @@ class LuckyURI
   def initialize(base, options)
     @base = base.to_s
     @options = options
+    pp @options
   end
 
   def uri
@@ -20,7 +21,7 @@ class LuckyURI
       end
     end
 
-    return URI.parse( URI.encode( uri.to_s ) )
+    return URI.parse( URI.encode( uri.to_s ) ).to_s
   end
-
+  
 end
