@@ -15,18 +15,20 @@ class Ballpark
     end
     
     def values
-        add_value(@primary_name)
-        add_value(@alternate_names)
-        add_value(@home_team)
-        add_value(@league)
-        add_value(@street_address)
-        add_value(@city)
-        add_value(@state)
-        add_value(@zip)
-        add_value(@latitude)
-        add_value(@longitude)
-        add_value(@active_status)
-        
+        if( @ballpark.empty? )
+            add_value(@primary_name)
+            add_value(@alternate_names)
+            add_value(@home_team)
+            add_value(@league)
+            add_value(@street_address)
+            add_value(@city)
+            add_value(@state)
+            add_value(@zip)
+            add_value(@latitude)
+            add_value(@longitude)
+            add_value(@active_status)
+        end
+            
         return @ballpark
     end
     

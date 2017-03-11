@@ -10,27 +10,57 @@ class SearchResultsList
   end
 
   def get_json_from_file
-    return File.read @resource
+    begin
+      p "Attempting to read the file, #{@resource}..."
+      file = File.read @resource
+    rescue
+      p 'Error occurred while trying to read file!'
+      file = nil
+    else
+      p 'Successfully read file!'
+    ensure
+      return file
+    end
   end
 
   def get_json_from_uri
-    buffer = open(@resource).read
-    return buffer
+    begin
+      p 'Getting search results from Google Custom Search Engine API using the endpoint:'
+      p @resource
+      buffer = open(@resource).read
+    rescue
+      p 'Error occurred while reading data from Google CSE API!'
+      buffer = nil
+    else
+      p 'Successfully read data from Google CSE API!'
+    ensure
+      p 'Taking a quick break...'
+      sleep(2)
+      return buffer
+    end
   end
 
   def parse_results_from_json
-    search_results_json_object = JSON.parse @json
-    search_items = search_results_json_object['items']
-    search_results = []
+    begin
+      p "Parsing JSON string..."
+      search_results_json_object = JSON.parse @json
+    rescue
+      p 'Error occurred while parsing JSON data!'
+      search_results = nil
+    else
+      p 'Successfully parsed JSON data! Grabbing search results from JSON object...'
+      search_items = search_results_json_object['items']
+      search_results = []
 
-    [@limit, search_items.length].min.times do |i|
-      search_result = SearchResult.new
-      search_result.link = search_items[i]['link']
-      search_result.title = search_items[i]['title']
-      search_results.push search_result
+      [@limit, search_items.length].min.times do |i|
+        search_result = SearchResult.new
+        search_result.link = search_items[i]['link']
+        search_result.title = search_items[i]['title']
+        search_results.push search_result
+      end
+    ensure
+      return search_results
     end
-
-    return search_results
   end
 
   def process_json_resource
@@ -39,10 +69,6 @@ class SearchResultsList
     else
       return get_json_from_uri
     end
-  end
-  
-  def save_results(filename)
-    
   end
 
   def show_results
