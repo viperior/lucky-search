@@ -27,6 +27,10 @@ require_relative 'ballpark-web-page.rb'
 def main
 
   p 'Lucky Search'
+  
+  # Debug
+  target_index_mode = true
+  target_index = 0
 
   # Get Lucky Search Configuration Settings
   lucky_config = LuckyConfig.new
@@ -41,63 +45,69 @@ def main
   
   search_terms_list.terms.each_with_index do |line, index|
     
-    ballpark_name = line[0]
+    if( index == target_index || !target_index_mode )  # debug
     
-    current_ballpark = Ballpark.new
-    current_ballpark.primary_name = ballpark_name
-    
-    p "Finding information about #{current_ballpark.primary_name}..."
-    
-    p 'Searching Google for the ballpark\'s web page...'
-    
-    cse_endpoint_uri = GoogleCSEEndpoint.new( lucky_config, current_ballpark ).uri
-    search_results = SearchResultsList.new( 'uri', cse_endpoint_uri, 1 )
-    
-    p 'Results retrieved!'
-    
-    ballpark_search_result = search_results.results[0]
-    current_ballpark.website = ballpark_search_result.link
-    current_ballpark.home_team = ballpark_search_result.team_name
-    
-    p "It looks like #{current_ballpark.primary_name} is the home stadium of the #{current_ballpark.home_team}"
-    p "Their website is: #{current_ballpark.website}"
-    
-    current_ballpark_website_object = BallparkWebPage.new( lucky_config, current_ballpark )
-    
-    if( !current_ballpark_website_object.entity_address.nil? )
-      p "I identified the address for this ballpark as: #{current_ballpark_website_object.entity_address}"
-      p 'Looking up the detailed address info from online sources...'
+      ballpark_name = line[0]
       
-      current_ballpark_address_object = Address.new( lucky_config, current_ballpark_website_object )
-      current_ballpark.city = current_ballpark_address_object.city
-      current_ballpark.latitude = current_ballpark_address_object.latitude
-      current_ballpark.longitude = current_ballpark_address_object.longitude
-      current_ballpark.state = current_ballpark_address_object.state
-      current_ballpark.street_address = current_ballpark_address_object.street_address
-      current_ballpark.zip = current_ballpark_address_object.zipcode
+      current_ballpark = Ballpark.new
+      current_ballpark.primary_name = ballpark_name
       
-      p "It looks like #{current_ballpark.primary_name} is located in #{current_ballpark.city}, #{current_ballpark.state}"
-      p "Street address: #{current_ballpark.street_address}"
-      p "Map coordinates: #{current_ballpark.latitude}, #{current_ballpark.longitude}"
-    else
-      p "I couldn't find the address of #{current_ballpark.primary_name} from MLB.com or Google Places."
-    end
+      p "Finding information about #{current_ballpark.primary_name}..."
+      
+      p 'Searching Google for the ballpark\'s web page...'
+      
+      cse_endpoint_uri = GoogleCSEEndpoint.new( lucky_config, current_ballpark ).uri
+      search_results = SearchResultsList.new( 'uri', cse_endpoint_uri, 1 )
+      
+      p 'Results retrieved!'
+      
+      ballpark_search_result = search_results.results[0]
+      current_ballpark.website = ballpark_search_result.link
+      current_ballpark.home_team = ballpark_search_result.team_name
+      
+      p "It looks like #{current_ballpark.primary_name} is the home stadium of the #{current_ballpark.home_team}"
+      p "Their website is: #{current_ballpark.website}\n"
+      
+      current_ballpark_website_object = BallparkWebPage.new( lucky_config, current_ballpark )
+      
+      if( !current_ballpark_website_object.entity_address.nil? )
+        p "I identified the address for this ballpark as: #{current_ballpark_website_object.entity_address}\n"
+        p 'Looking up the detailed address info from online sources...'
+        
+        current_ballpark_address_object = Address.new( lucky_config, current_ballpark_website_object )
+        current_ballpark.city = current_ballpark_address_object.city
+        current_ballpark.latitude = current_ballpark_address_object.latitude
+        current_ballpark.longitude = current_ballpark_address_object.longitude
+        current_ballpark.state = current_ballpark_address_object.state
+        current_ballpark.street_address = current_ballpark_address_object.street_address
+        current_ballpark.zip = current_ballpark_address_object.zipcode
+        
+        current_ballpark_address_object.show_address_data
+        
+        p "It looks like #{current_ballpark.primary_name} is located in #{current_ballpark.city}, #{current_ballpark.state}"
+        p "Street address: #{current_ballpark.street_address}"
+        p "Map coordinates: #{current_ballpark.latitude}, #{current_ballpark.longitude}"
+      else
+        p "I couldn't find the address of #{current_ballpark.primary_name} from MLB.com or Google Places."
+      end
+      
+      ballpark_list.add_ballpark( current_ballpark )
+      
+      if( index == (search_terms_list.terms.length - 1) )
+        p "Data for #{index + 1} ballparks has been collected!"
+        sleep(2)
+      else
+        p "\nTaking a quick break..."
+        sleep(1)
+        p "Fetching the data for the next ballpark\n"
+      end
     
-    ballpark_list.add_ballpark( current_ballpark )
-    
-    if( index == (search_terms_list.terms.length - 1) )
-      p "Data for #{index + 1} ballparks has been collected!"
-      sleep(2)
-    else
-      p "Taking a quick break..."
-      sleep(1)
-      p "Fetching the data for the next ballpark"
-    end
+    end #debg
     
   end
   
   save_filename = 'testing5.csv'
-  p "Saving ballpark data to the file, #{save_filename}..."
+  p "\nSaving ballpark data to the file, #{save_filename}...\n"
   ballpark_list.save_as_csv( save_filename )
   
   p 'Thanks for using LuckySearch!'
