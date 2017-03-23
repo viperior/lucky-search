@@ -47,7 +47,8 @@ class BallparkList
           c += 1
           db.execute_query("INSERT INTO #{table_name} (primary_name) VALUES ('#{park_name}')")
         else
-          p "The ballpark, '#{park_name}', is already in the database. Skipping adding its name to a new record..."
+          p "#{park_name} is already in the database. Skipping..."
+          sleep (0.1)
         end
       end
     rescue => e

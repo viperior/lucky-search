@@ -1,52 +1,70 @@
-require 'csv'
 require 'pp'
 require 'sqlite3'
 require_relative 'ballpark.rb'
 require_relative 'ballpark-list.rb'
-require_relative 'query-term-list.rb'
 require_relative 'sqlite3-session.rb'
 
 def main
 
-  p 'Lucky Search (Module: Add Ballpark Names)'
+  p 'Lucky Search (Module: Add MLB Data)'
+  sleep(0.5)
   
   # Debug
-  target_index_mode = false
-  target_index = 0
-
-  # Specify the filename of the search terms list
-  search_terms_list = QueryTermList.new( 'search-terms.csv' )
-  p "Loading search terms from #{search_terms_list.filename}..."
+  target_index_mode = true
+  target_index = 4
   
-  p 'Building ballpark data collection...'
+  p 'Retrieving ballparks from database...'
+  sleep(0.5)
   
+  # Read the ballparks from the database
+  db_session = SQLite3DatabaseSession.new('mlbapp')
+  db_session.execute_query('SELECT (SELECT COUNT() FROM ballparks) as count, * FROM ballparks;')
+  #select (select count() from XXX) as count, * from XXX;
+  result = db_session.result
+  
+  # Construct a ballpark list object to store the data
   ballpark_list = BallparkList.new
   
-  search_terms_list.terms.each_with_index do |line, index|
-    
+  # Create a ballpark object for each database record, and populate its data
+  index = 0
+  while( record = result.next ) do
+  #result.each_with_index do |record, index|
     if( index == target_index || !target_index_mode )  # debug
     
-      ballpark_name = line[0]
-      
+      pp record
+    
+      # Set up a new ballpark object
       current_ballpark = Ballpark.new
-      current_ballpark.primary_name = ballpark_name
       
-      ballpark_list.add_ballpark( current_ballpark )
+      # Extract the data
+      # code...
       
-      if( index == (search_terms_list.terms.length - 1) )
-        p "#{index + 1} ballparks have been processed!"
-      end
+      # Add the ballpark to the list
+      #ballpark_list.add_ballpark(current_ballpark)
+      
+      #if( index == (record['count'] - 1) )
+      #  p "#{index + 1} ballparks have been processed!"
+      #end
     
-    end #debg
+    end #debug
     
+    index += 1
   end
   
+  # Create a ballpark list to store all of the ballpark objects
+  # code...
+  
+  # For each ballpark, try to get its MLB.com data
+  # code...
+  
+  # For each ballpark where data was successfully retrieved, add that data
+  #  back to its corresponding database record.
   db_name = 'mlbapp'
   table_name = 'ballparks'
   p
-  p "Saving ballpark data to the database, #{db_name}..."
+  p "Saving ballpark data to the #{table_name} table database, #{db_name}..."
   p
-  ballpark_list.save_primary_names_to_db(db_name, table_name)
+  # code that saves the data back to the db....
   
   p 'Thanks for using LuckySearch!'
   p

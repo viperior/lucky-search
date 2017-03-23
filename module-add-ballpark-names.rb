@@ -37,7 +37,7 @@ def main
         p "#{index + 1} ballparks have been processed!"
       end
     
-    end #debg
+    end #debug
     
   end
   

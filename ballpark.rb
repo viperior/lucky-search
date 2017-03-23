@@ -1,6 +1,6 @@
 class Ballpark
 
-    attr_accessor :active_status, :alternate_names, :city, :home_team, :latitude, :league, :longitude, :primary_name, :state, :street_address, :website, :zip
+    attr_accessor :active_status, :alternate_names, :ballpark_db_id, :city, :home_team, :latitude, :league, :longitude, :primary_name, :state, :street_address, :website, :zip
     
     def initialize
         @ballpark = []
