@@ -2,11 +2,10 @@ class SQLite3DatabaseSession
   # Represents a SQLite3 session for a single database. Create the database,
   # execute queries, and fetch data.
   
-  attr_reader :result
+  attr_reader :columns, :result, :rows
   
   def initialize(db_name)
     @db_name = db_name
-    @result
   end
   
   def create_db
@@ -35,6 +34,9 @@ class SQLite3DatabaseSession
       
       # Execute the statement and store the result.
       @result = sql_statement.execute
+      
+      #columns, *rows = db.execute2( "select * from test" )
+      #@columns, *@rows = db.execute2(query)
     rescue SQLite3::Exception => e
       # Display the error message upon error.
       p "Exception occurred"
