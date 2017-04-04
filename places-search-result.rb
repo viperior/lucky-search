@@ -1,6 +1,6 @@
 class PlacesSearchResult
 
-  attr_reader :photo_attribution_html, :photo_height, :photo_reference, :photo_width
+  attr_reader :has_photo, :photo_attribution_html, :photo_height, :photo_reference, :photo_width
 
   def initialize(api_endpoint)
     @api_endpoint = api_endpoint
@@ -22,11 +22,17 @@ class PlacesSearchResult
       p 'Successfully parsed JSON data! Grabbing data from JSON object...'
       result = results_json_object['results'][0]
       
-      photo = result['photos'][0]
-      @photo_attribution_html = photo['html_attributions'][0]
-      @photo_reference = photo['photo_reference']
-      @photo_height = photo['height']
-      @photo_width = photo['width']
+      if( result.nil? || result['photos'].nil? )
+        p 'Warning - No photo found!'
+        @has_photo = false
+      else
+        @has_photo = true
+        photo = result['photos'][0]
+        @photo_attribution_html = photo['html_attributions'][0]
+        @photo_reference = photo['photo_reference']
+        @photo_height = photo['height']
+        @photo_width = photo['width']
+      end
     end
   end
 

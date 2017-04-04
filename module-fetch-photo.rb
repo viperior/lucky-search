@@ -29,7 +29,8 @@ def main
   
   # Create and populate a ballpark list with only modern stadiums.
   ballpark_list = BallparkList.new
-  ballpark_list.load_from_sqlite_db('mlbapp', 'ballparks', 'active_status = 1')
+  condition = 'active_status = 0'
+  ballpark_list.load_from_sqlite_db('mlbapp', 'ballparks', condition)
   
   ballpark_list.ballparks.each do |ballpark|
     sep = '- - - - - - - - - - - - - - - - - - - - -'
@@ -41,30 +42,34 @@ def main
     # Look up the ballpark using Google Places API
     ballpark_places_data = PlacesSearchResult.new(places_api_endpoint.uri)
     
-    # Display the API data
-    p "Places API Photo Data"
-    p "Height: #{ballpark_places_data.photo_height}"
-    p "Width: #{ballpark_places_data.photo_width}"
-    p "Attribution HTML: #{ballpark_places_data.photo_attribution_html}"
-    p "Photo Reference: #{ballpark_places_data.photo_reference}"
-    
-    # Build the photo url
-    max_height = 800
-    max_width = 800
-    photo_url = 'https://maps.googleapis.com/maps/api/place/photo?key='
-    photo_url += lucky_config.places_api_key + '&photoreference='
-    photo_url += ballpark_places_data.photo_reference + '&maxheight='
-    photo_url += max_height.to_s + '&maxwidth=' + max_width.to_s
-    
-    # Generage the image file name
-    image_name = 'park' + ballpark.ballpark_db_id.to_s + '.jpg'
-    image_directory = './img/'
-    image_path = image_directory + image_name
-    
-    # Save the image to local storage
-    sleep 0.8
-    File.open(image_path, 'wb') do |fo|
-      fo.write open(photo_url).read 
+    if( ballpark_places_data.has_photo )
+       # Display the API data
+      p "Places API Photo Data"
+      p "Height: #{ballpark_places_data.photo_height}"
+      p "Width: #{ballpark_places_data.photo_width}"
+      p "Attribution HTML: #{ballpark_places_data.photo_attribution_html}"
+      p "Photo Reference: #{ballpark_places_data.photo_reference}"
+      
+      # Build the photo url
+      max_height = 800
+      max_width = 800
+      photo_url = 'https://maps.googleapis.com/maps/api/place/photo?key='
+      photo_url += lucky_config.places_api_key + '&photoreference='
+      photo_url += ballpark_places_data.photo_reference + '&maxheight='
+      photo_url += max_height.to_s + '&maxwidth=' + max_width.to_s
+      
+      # Generage the image file name
+      image_name = 'park' + ballpark.ballpark_db_id.to_s + '.jpg'
+      image_directory = './img/'
+      image_path = image_directory + image_name
+      
+      # Save the image to local storage
+      sleep 0.8
+      File.open(image_path, 'wb') do |fo|
+        fo.write open(photo_url).read 
+      end
+    else
+      p 'No photo result found!'
     end
     
     p sep
