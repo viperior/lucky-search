@@ -28,9 +28,10 @@ class SearchResultsList
       p 'Getting search results from Google Custom Search Engine API using the endpoint:'
       p @resource
       buffer = open(@resource).read
-    rescue
+    rescue => e
       p 'Error occurred while reading data from Google CSE API!'
       buffer = nil
+      raise e
     else
       p 'Successfully read data from Google CSE API!'
     ensure
@@ -44,9 +45,10 @@ class SearchResultsList
     begin
       p "Parsing JSON string..."
       search_results_json_object = JSON.parse @json
-    rescue
+    rescue => e
       p 'Error occurred while parsing JSON data!'
       search_results = nil
+      raise e
     else
       p 'Successfully parsed JSON data! Grabbing search results from JSON object...'
       search_items = search_results_json_object['items']
