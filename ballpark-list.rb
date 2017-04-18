@@ -71,10 +71,10 @@ class BallparkList
       c = 0
 
       @ballparks.each do |ballpark|
-        db.execute_query("UPDATE #{table_name} SET places_photo_attribution_html = #{ballpark.places_photo_attribution_html};")
+        db.execute_query("UPDATE #{table_name} SET places_photo_attribution_html = '#{ballpark.places_photo_attribution_html}';")
         r = db.result
 
-        db.execute_query("UPDATE #{table_name} SET places_photo_filename = #{ballpark.places_photo_filename};")
+        db.execute_query("UPDATE #{table_name} SET places_photo_filename = '#{ballpark.places_photo_filename}';")
         r = db.result
 
         c += 1
