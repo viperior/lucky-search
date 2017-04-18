@@ -5,29 +5,29 @@ class BallparkList
   def initialize
     @ballparks = []
   end
-  
+
   def add_ballpark(ballpark_object)
     @ballparks.push(ballpark_object)
   end
-  
+
   def load_from_sqlite_db(db_name, table_name, condition = '')
     begin
       # Establish database connection
       p 'Establishing database connection...'
       db = SQLite3DatabaseSession.new(db_name)
-      
+
       # Prepare optional condition, if provided.
       if( !condition.empty? )
         condition = " WHERE #{condition}"
       end
-      
+
       # Prepare sql query
       sql = "SELECT * FROM #{table_name}#{condition};"
-      
+
       # Select the ballpark records
       db.execute_query(sql)
       result = db.result
-      
+
       # Process the data from the database
       result.each_with_index do |row, index|
         current_ballpark = Ballpark.new
@@ -43,7 +43,7 @@ class BallparkList
         current_ballpark.latitude = row['latitude']
         current_ballpark.longitude = row['longitude']
         current_ballpark.active_status = row['active_status']
-        
+
         add_ballpark(current_ballpark)
       end
     rescue => e
@@ -54,7 +54,7 @@ class BallparkList
       p 'Ballparks were successfully loaded from the sqlite3 database.'
     end
   end
-  
+
   def save_as_csv(filename)
     CSV.open(filename, 'wb') do |csv|
       @ballparks.each do |ballpark|
@@ -62,32 +62,57 @@ class BallparkList
       end
     end
   end
-  
+
+  def save_places_photo_data_to_db(db_name, table_name)
+    begin
+      p 'Establishing database connection...'
+      db = SQLite3DatabaseSession.new(db_name)
+      p 'Database connection established...'
+      c = 0
+
+      @ballparks.each do |ballpark|
+        db.execute_query("UPDATE #{table_name} SET places_photo_attribution_html = #{ballpark.places_photo_attribution_html};")
+        r = db.result
+
+        db.execute_query("UPDATE #{table_name} SET places_photo_filename = #{ballpark.places_photo_filename};")
+        r = db.result
+
+        c += 1
+      end
+    rescue => e
+      p 'Error occurred while attempting to add ballpark Places Photo data to the database!'
+      p e.backtrace
+      raise
+    else
+      p "Photo data for #{c} ballpark#{c > 1 ? 's' : ''} added to database!"
+    end
+  end
+
   def save_primary_names_to_db(db_name, table_name)
     begin
       p 'Establishing database connection...'
       db = SQLite3DatabaseSession.new(db_name)
       p 'Database connection established...'
-      
+
       c = 0
-      
+
       @ballparks.each do |ballpark|
         # Sanitize the ballpark name
         park_name = ballpark.primary_name.gsub(/(\')+/, "''")
-        
+
         # Check if the ballpark is already in the database
         db.execute_query("SELECT COUNT(*) FROM ballparks WHERE primary_name = '#{park_name}'")
         r = db.result
         count = nil
-        
+
         r.each_with_index do |row, index|
           if( index == 0 )
             count = row[0]
           end
         end
-        
+
         is_in_db = count > 0
-        
+
         if( !is_in_db )
           c += 1
           db.execute_query("INSERT INTO #{table_name} (primary_name) VALUES ('#{park_name}')")
@@ -104,5 +129,5 @@ class BallparkList
       p "#{c} ballpark#{c > 1 ? 's' : ''} added to database!"
     end
   end
-  
+
 end

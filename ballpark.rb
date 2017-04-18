@@ -1,19 +1,19 @@
 class Ballpark
 
-    attr_accessor :active_status, :alternate_names, :ballpark_db_id, :city, :home_team, :latitude, :league, :longitude, :primary_name, :state, :street_address, :website, :zip
-    
+    attr_accessor :active_status, :alternate_names, :ballpark_db_id, :city, :home_team, :latitude, :league, :longitude, :places_photo_attribution_html, :places_photo_filename, :primary_name, :state, :street_address, :website, :zip
+
     def initialize
         @ballpark = []
     end
-    
+
     def add_value(value)
         if( value.nil? )
             value = ''
         end
-        
+
         @ballpark.push(value)
     end
-    
+
     def values
         if( @ballpark.empty? )
             add_value(@primary_name)
@@ -28,8 +28,8 @@ class Ballpark
             add_value(@longitude)
             add_value(@active_status)
         end
-            
+
         return @ballpark
     end
-    
+
 end
